@@ -1,21 +1,36 @@
+import { Source } from '../../../types/news-api';
 import './sources.css';
 
 class Sources {
-    draw(data) {
+    draw(data: Source[]): void {
         const fragment = document.createDocumentFragment();
-        const sourceItemTemp = document.querySelector('#sourceItemTemp');
+        const sourceItemTemp = document.querySelector('#sourceItemTemp') as HTMLTemplateElement | null;
 
-        data.forEach((item) => {
-            const sourceClone = sourceItemTemp.content.cloneNode(true);
+        if (sourceItemTemp) {
+            data.forEach((item) => {
+                const sourceClone = sourceItemTemp.content.cloneNode(true) as HTMLElement;
 
-            sourceClone.querySelector('.source__item-name').textContent = item.name;
-            sourceClone.querySelector('.source__item').setAttribute('data-source-id', item.id);
+                const nameEl = sourceClone.querySelector('.source__name');
+                if (nameEl) {
+                    nameEl.textContent = item.name;
+                }
 
-            fragment.append(sourceClone);
-        });
+                const itemEl = sourceClone.querySelector('.source__item');
+                if (itemEl) {
+                    // TypeScript знает, что item.id может быть string | null, приводим к строке
+                    itemEl.setAttribute('data-source-id', item.id || '');
+                }
 
-        document.querySelector('.sources').append(fragment);
+                fragment.appendChild(sourceClone);
+            });
+        }
+
+        const sourcesContainer = document.querySelector('.sources');
+        if (sourcesContainer) {
+            sourcesContainer.innerHTML = '';
+            sourcesContainer.appendChild(fragment);
+        }
     }
 }
 
-export default Sources;
+export { Sources };
