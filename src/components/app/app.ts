@@ -1,6 +1,5 @@
 import { AppController } from '../controller/controller';
 import { AppView } from '../view/appView';
-import { NewsApiResponse, SourcesResponse } from '../../types/news-api';
 
 class App {
     private controller: AppController;
@@ -13,12 +12,18 @@ class App {
 
     start(): void {
         const sourcesBtn = document.querySelector('.sources');
+        
         if (sourcesBtn) {
-            sourcesBtn.addEventListener('click', (e) => 
-                this.controller.getNews(e, (data) => this.view.drawNews(data as NewsApiResponse))
-            );
+            sourcesBtn.addEventListener('click', (e) => {
+                this.controller.getNews(e, (data) => {
+                    this.view.drawNews(data);
+                });
+            });
         }
-        this.controller.getSources((data) => this.view.drawSources(data as SourcesResponse));
+        
+        this.controller.getSources((data) => {
+            this.view.drawSources(data);
+        });
     }
 }
 

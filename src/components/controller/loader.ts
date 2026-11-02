@@ -1,21 +1,15 @@
-// Описываем, какие настройки передаются при создании загрузчика
 export interface LoaderOptions {
   apiKey?: string;
   sources?: string;
 }
 
-// Описываем, что принимает метод getResp
 export interface LoaderParameters {
   endpoint: string;
-  options?: Partial<LoaderOptions>; // Используем Utility Type Partial!
+  options?: Partial<LoaderOptions>;
 }
 
-// Описываем, что принимает метод load
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'; // Union Type
-
-// Описываем, что возвращает fetch
-export type CallbackFunction = (data: unknown) => void; 
-
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+export type CallbackFunction<T> = (data: T) => void;
 
 class Loader {
     private baseLink: string;
@@ -26,16 +20,18 @@ class Loader {
         this.options = options;
     }
 
-    getResp(
+    getResp<T>(
         { endpoint, options = {} }: LoaderParameters,
-        callback: CallbackFunction = () => {}
+        callback: CallbackFunction<T> = () => {}
     ): void {
-        this.load('GET', endpoint, callback, options);
+        this.load<T>('GET', endpoint, callback, options);
     }
 
-    errorHandler(res: Response): Response { // Типизируем как Response из стандартной библиотеки браузера
+    errorHandler(res: Response): Response {
         if (!res.ok) {
-            // ...
+            if (res.status === 401 || res.status === 404)
+                console.log(`Sorry, but there is ${res.status} error: ${res.statusText}`);
+            throw Error(res.statusText);
         }
         return res;
     }
@@ -43,19 +39,25 @@ class Loader {
     makeUrl(options: LoaderOptions, endpoint: string): string {
         const urlOptions: LoaderOptions = { ...this.options, ...options };
         let url = `${this.baseLink}${endpoint}?`;
-        
-        // ... логика формирования url
 
-        return url;
+        Object.keys(urlOptions).forEach((key) => {
+            url += `${key}=${urlOptions[key as keyof LoaderOptions]}&`;
+        });
+
+        return url.slice(0, -1);
     }
 
-    load(
+    load<T>(
         method: HttpMethod, 
         endpoint: string, 
-        callback: CallbackFunction, 
+        callback: CallbackFunction<T>, 
         options: LoaderOptions = {}
     ): void {
-       
+        fetch(this.makeUrl(options, endpoint), { method })
+            .then(this.errorHandler)
+            .then((res) => res.json())
+            .then((data) => callback(data as T))
+            .catch((err) => console.error(err));
     }
 }
 

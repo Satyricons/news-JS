@@ -1,5 +1,6 @@
 import AppLoader from './appLoader';
 import { CallbackFunction } from './loader';
+import { NewsApiResponse, SourcesResponse } from '../../types/news-api';
 
 class AppController {
     private loader: AppLoader;
@@ -8,11 +9,13 @@ class AppController {
         this.loader = new AppLoader();
     }
 
-    getSources(callback: CallbackFunction): void {
-        this.loader.getResp({ endpoint: 'sources' }, callback);
+    // Указываем <SourcesResponse> для колбэка
+    getSources(callback: CallbackFunction<SourcesResponse>): void {
+        this.loader.getResp<SourcesResponse>({ endpoint: 'sources' }, callback);
     }
 
-    getNews(e: Event, callback: CallbackFunction): void {
+    // Указываем <NewsApiResponse> для колбэка
+    getNews(e: Event, callback: CallbackFunction<NewsApiResponse>): void {
         const target = e.target as HTMLElement;
         const newsContainer = e.currentTarget as HTMLElement;
         let sourceId = '';
@@ -23,7 +26,7 @@ class AppController {
             sourceId = target.getAttribute('data-source-id') || '';
         }
 
-        this.loader.getResp(
+        this.loader.getResp<NewsApiResponse>(
             {
                 endpoint: 'everything',
                 options: { sources: sourceId },
