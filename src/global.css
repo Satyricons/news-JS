@@ -160,3 +160,20 @@ body {
     padding: 10px;
   }
 }
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 20px;
+}
+
+.source__item {
+  background-color: #2a2a2a;
+  color: white;
+  border: 1px solid #555;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
